@@ -510,11 +510,72 @@ class NMatrix
       count = shape.inject(:*)
             
       # Linear spacing between elements calculated in step
-      #   step = limit - base / (count - 1)
+      #   step = limit - base / (count - 1
       #   [Result Sequence] = [0->N sequence] * step + [Base]
       step = (limit - base) * (1.0 / (count - 1))
       result = NMatrix.seq(shape, {:dtype => :float64}) * step
       result += NMatrix.new(shape, base)
+      result
+    end
+
+    #
+    # call-seq:
+    #     logspace(base, limit) -> 1x50 NMatrix with lg_base = 10 
+    #     logspace(base, limit, shape, lg_base) -> NMatrix
+    #     logspace(base, :pi, n) -> 1xN NMatrix with interval [10 ^ base, Math::PI]
+    #
+    # Returns an NMatrix with +[shape[0] x shape[1] x .. x shape[dim-1]]+ values of dtype +:float64+ logarithmically spaced from
+    # +lg_base ^ base+ to +lg_base ^ limit+, inclusive.
+    #
+    # See: http://www.mathworks.com/help/matlab/ref/logspace.html
+    #
+    # * *Arguments* :
+    #   - +base+ -> lg_base ** base is the first value in the sequence
+    #   - +limit+ -> lg_base ** limit is the last value in the sequence.
+    #   - +shape+ -> Desired output shape. Default returns a 1x50 row vector.
+    # * *Returns* :
+    #   - NMatrix with +:float64+ values.
+    #
+    # Examples :-
+    #
+    #   NMatrix.logspace(1,:pi, 7)
+    #     =>[10.0000, 
+    #         8.2450, 
+    #         6.7980, 
+    #         5.6050, 
+    #         4.6213, 
+    #         3.8103, 
+    #         3.1416
+    #       ]
+    #
+    #   NMatrix.logspace(1,2,[3,2])
+    #     =>[
+    #         [10.0, 15.8489]
+    #         [25.1189, 39.8107]
+    #         [63.0957, 100.0]
+    #       ]
+    #
+    def logspace(base, limit, shape = [50], lg_base = 10)
+      
+      shape = [shape] if shape.is_a? Integer
+      limit = Math.log(Math::PI, lg_base) if limit == :pi 
+
+      raise(ArgumentError, "Parameter 1 and 2 must be strictly positive") if base <= 0 or limit <= 0
+      raise(NotImplementedError, "logspace() is currently implemented only for vectors and 2D matrices") if shape.length > 2
+
+      result = NMatrix.linspace(base, limit, shape)
+      
+      if shape.length == 1
+        0.upto(shape[0] - 1).each { |i| result[i] = lg_base ** result[i] } 
+        result[shape[0] - 1] = Math::PI if limit == Math.log(Math::PI, lg_base)
+      else
+        0.upto(shape[0] - 1).each do |i|
+          0.upto(shape[1] - 1).each do |j|
+            result[i,j] = lg_base ** result[i,j]
+          end
+        end
+        result[shape[0]-1, shape[1] -1] = Math::PI if limit== Math.log(Math::PI, lg_base)
+      end
       result
     end
 
