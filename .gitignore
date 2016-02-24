@@ -11,7 +11,6 @@ ext/nmatrix/dense/467.c
 ext/nmatrix/dense/*.f
 ext/nmatrix/dense/transpose.txt
 ext/nmatrix/yale/aicm.tex
-tmp/
 test.c
 spec/*.mtx
 *.so
