@@ -1,7 +1,6 @@
 require 'nmatrix'
 require 'nmatrix/lapacke'
 
-a = []
 
 3.upto(300) do |i|
 	a = NMatrix.seq([i,i], {:dtype => :float64})
